@@ -28,13 +28,9 @@ Si utilizas una API que requiere clave (por ejemplo OpenWeatherMap):
 
 ## Licencia
 
-Especifica una licencia (por ejemplo **MIT**) o indica "All rights reserved" si no deseas compartir derechos.
+cc By
 
 ## Contacto
 
 - Tu nombre — `tu.email@example.com`
 - Perfil de GitHub: `https://github.com/tu-usuario`
-
----
-
-*Si quieres, puedo añadir capturas, un enlace a la demo o adaptar el tono (formal/técnico/informal).*
