@@ -23,3 +23,4 @@ function mostrarTiempo(data) {
     temperatureZone.innerHTML += "<h2>Temperatura:</h2>" + data.current_weather.temperature + " °C";
     detailZone.innerHTML += "<h2>Detalles:</h2>" + "Viento: " + data.current_weather.windspeed + " km/h" + "<br>" + "Humedad: " + data.hourly.relative_humidity_2m[0] + " %";
 }
+
