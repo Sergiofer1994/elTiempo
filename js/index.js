@@ -97,7 +97,6 @@ function mostrarTiempoProximosDias() {
     const max = (weatherData.daily && weatherData.daily.temperature_2m_max) || [];
     const min = (weatherData.daily && weatherData.daily.temperature_2m_min) || [];
     const wcode = (weatherData.daily && weatherData.daily.weathercode) || [];
-
     for (let i = 0; i < Math.min(5, dates.length); i++) {
         const d = new Date(dates[i]);
         const weekday = d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
