@@ -1,0 +1,20 @@
+[33m4808160[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Merge branch 'dev'
+[33mbc27f14[m[33m ([m[1;31morigin/feat/html[m[33m, [m[1;32mfeat/html[m[33m, [m[1;32mdev[m[33m)[m feat: new zone created
+[33m8d2b061[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat: readme done with copilot
+[33mfe5a2de[m[33m ([m[1;31morigin/dev[m[33m)[m feat: readme done with copilot healp
+[33mba661f6[m chore: completar README
+[33mb6e8848[m fix: resolving conflict of merge dev with feat/js
+[33m4493043[m Merge branch style
+[33m786a857[m[33m ([m[1;31morigin/html[m[33m, [m[1;32mhtml[m[33m)[m feat: html realiced
+[33mbcda0c7[m fix: html fixed
+[33m4a6375a[m[33m ([m[1;31morigin/feat/js[m[33m, [m[1;32mfeat/js[m[33m)[m fix: js fixed
+[33mdb63753[m feat: js started
+[33m67201ef[m[33m ([m[1;31morigin/style[m[33m, [m[1;32mstyle[m[33m)[m fix: copied index.html to check css
+[33me74547e[m fix CSS linked to the HTML
+[33mdb698d5[m feat: CSS created and finished
+[33m3439dcd[m feat: HTML finished
+[33mbb1ce0a[m feat: estrucre created
+[33mb5d1df8[m chore:index.css
+[33m756cced[m[33m ([m[1;32mreadme[m[33m)[m first commit
+[33m2fd9adc[m first commit
+[33mce53bba[m first commit
