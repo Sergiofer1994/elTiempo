@@ -99,3 +99,47 @@ function showWeather(data) {
     forecastHtml += '</div>';
     weatherZone.innerHTML = forecastHtml;
 } 
+
+function mostrarProximasHoras() {
+    if (!weatherData) return;
+    futureZone.innerHTML = "<h2>Próximas 5 horas</h2>";
+
+    const times = (weatherData.hourly && weatherData.hourly.time) || [];
+    const temps = (weatherData.hourly && weatherData.hourly.temperature_2m) || [];
+    const hum = (weatherData.hourly && weatherData.hourly.relative_humidity_2m) || [];
+    const wcode = (weatherData.hourly && weatherData.hourly.weathercode) || [];
+
+    for (let i = 1; i <= 5; i++) {
+        if (!times[i]) break;
+        const hour = times[i].includes('T') ? times[i].split('T')[1].slice(0,5) : times[i];
+        const icon = weatherCodeToIcon(wcode[i]);
+        futureZone.innerHTML += `
+            <p>
+                ⏰ ${hour}<br>
+                ${icon} 🌡️ ${temps[i] !== undefined ? temps[i] : '—'} °C<br>
+                💧 ${hum[i] !== undefined ? hum[i] : '—'} %
+            </p>
+        `;
+    }
+}
+
+function mostrarTiempoProximosDias() {
+    if (!weatherData) return;
+    weatherZonegit.innerHTML += "<h2>Próximos 5 días</h2>";
+
+    const dates = (weatherData.daily && weatherData.daily.time) || [];
+    const max = (weatherData.daily && weatherData.daily.temperature_2m_max) || [];
+    const min = (weatherData.daily && weatherData.daily.temperature_2m_min) || [];
+    const wcode = (weatherData.daily && weatherData.daily.weathercode) || [];
+    for (let i = 0; i < Math.min(5, dates.length); i++) {
+        const d = new Date(dates[i]);
+        const weekday = d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
+        const icon = weatherCodeToIcon(wcode[i]);
+        weatherZone.innerHTML += `
+            <p>
+                📅 ${weekday}<br>
+                ${icon} ${max[i] !== undefined ? max[i] : '—'} °C / ${min[i] !== undefined ? min[i] : '—'} °C
+            </p>
+        `;
+    }
+}
