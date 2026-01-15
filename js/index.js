@@ -2,7 +2,7 @@ console.log("JavaScript funcionando");
 
 const LAT = 43.1900;
 const LON = -8.7600;
-const API_URL = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true&hourly=temperature_2m,weathercode,relative_humidity_2m,windspeed_10m&forecast_days=3&timezone=auto`; 
+const API_URL = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true&hourly=temperature_2m,weathercode,relative_humidity_2m,windspeed_10m&daily=temperature_2m_max,temperature_2m_min,weathercode&forecast_days=3&timezone=auto`; 
 document.addEventListener("load", getWeather());
 let weatherData = null;
 function mostrarTiempoActual(current) {
@@ -139,7 +139,7 @@ function mostrarProximasHoras() {
 
 function mostrarTiempoProximosDias() {
     if (!weatherData) return;
-    weatherZonegit.innerHTML += "<h2>Próximos 5 días</h2>";
+    weatherZone.innerHTML += "<h2>Próximos 5 días</h2>";
 
     const dates = (weatherData.daily && weatherData.daily.time) || [];
     const max = (weatherData.daily && weatherData.daily.temperature_2m_max) || [];
@@ -149,10 +149,11 @@ function mostrarTiempoProximosDias() {
         const d = new Date(dates[i]);
         const weekday = d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
         const icon = weatherCodeToIcon(wcode[i]);
+        const iconText = icon.icon;
         weatherZone.innerHTML += `
             <p>
                 📅 ${weekday}<br>
-                ${icon} ${max[i] !== undefined ? max[i] : '—'} °C / ${min[i] !== undefined ? min[i] : '—'} °C
+                ${iconText} ${max[i] !== undefined ? max[i] : '—'} °C / ${min[i] !== undefined ? min[i] : '—'} °C
             </p>
         `;
     }
