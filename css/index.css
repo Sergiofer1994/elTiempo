@@ -124,3 +124,11 @@ footer {
         grid-column: span 2;
     }
 }
+
+.weatherZone {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    width: 100px;
+    height: 100%;
+}
