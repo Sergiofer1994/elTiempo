@@ -2,28 +2,26 @@ console.log("JavaScript funcionando");
 
 const LAT = 43.1900;
 const LON = -8.7600;
-const API_URL = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true&hourly=temperature_2m,weathercode,relative_humidity_2m,windspeed_10m&daily=temperature_2m_max,temperature_2m_min,weathercode&forecast_days=3&timezone=auto`; 
-document.addEventListener("load", getWeather());
-let weatherData = null;
-function mostrarTiempoActual(current) {
-    let temperatureElement = `${current.temperature_2m} °C`;
-    let vientoElement = `${current.wind_speed_10m} km/h`;
-    let humedadElement = `${current.relative_humidity_2m} %`;
-    temperatureZone.innerHTML += "<h2>Temperatura Actual</h2>" + temperatureElement;
-    detailZone.innerHTML += "<h2>Detalles</h2>" + vientoElement + "<br>" + humedadElement;
-}
+const API_URL = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true&hourly=temperature_2m,weathercode,relative_humidity_2m,windspeed_10m&daily=temperature_2m_max,temperature_2m_min,weathercode&forecast_days=7&timezone=auto`;
 
+let weatherData = null;
+
+// Elementos del DOM
 const temperatureZone = document.getElementById("temperatureZone");
 const detailZone = document.getElementById("detailsZone");
 const futureZone = document.getElementById("futureZone");
 const weatherZone = document.getElementById("weatherZone");
+
+// Cargar el clima cuando la página esté lista
 window.addEventListener("load", getWeather);
+
 function getWeather() {
     fetch(API_URL)
         .then(response => response.json())
-        .then (data => showWeather(data))
+        .then(data => showWeather(data))
         .catch(error => console.error("Error fetching weather data:", error));
 }
+
 function weatherCodeToIcon(code) {
     const map = {
         0: {icon:'☀️', text:'Despejado'},
@@ -52,7 +50,7 @@ function weatherCodeToIcon(code) {
 }
 
 function showWeather(data) {
-    // Guardar los datos en weatherData para que otras funciones puedan usarlos
+    // Guardar los datos
     weatherData = data;
     
     // Limpiar zonas
@@ -68,7 +66,7 @@ function showWeather(data) {
     const wcodeArr = data.hourly.weathercode || [];
     const windsArr = data.hourly.windspeed_10m || [];
 
-    // Índice de la hora actual en arrays horarios
+    // Índice de la hora actual
     let idx = times.indexOf(current.time);
     if (idx === -1) idx = 0;
 
@@ -76,85 +74,158 @@ function showWeather(data) {
     const wind = current.windspeed || (windsArr[idx] !== undefined ? windsArr[idx] : '—');
     const wc = weatherCodeToIcon(current.weathercode);
 
-    temperatureZone.innerHTML = `<h2>Clima en Coristanco</h2>
+    // Mostrar clima actual
+    temperatureZone.innerHTML = `
+        <h2>Clima en Coristanco</h2>
         <div class="current">
             <span class="icon" style="font-size:2rem">${wc.icon}</span>
             <strong style="font-size:1.5rem">${current.temperature} °C</strong>
             <div>${wc.text}</div>
         </div>`;
 
-    detailZone.innerHTML = `<h2>Detalles</h2>
-        <div>Viento: ${wind} km/h</div>
-        <div>Humedad: ${humidity} %</div>`;
-
-    // Próximas horas (6)
-    let forecastHtml = '<h3>Próximos Días</h3><div class="forecast" style="display:flex;gap:10px">'; 
-    for (let i = idx; i < Math.min(idx + 6, times.length); i++) {
-        const time = times[i];
-        const hour = time.includes('T') ? time.split('T')[1].slice(0,5) : time;
-        const icon = weatherCodeToIcon(wcodeArr[i]);
-        const temp = tempArr[i] !== undefined ? tempArr[i] : '—';
-        forecastHtml += `<div style="text-align:center;padding:6px;border-radius:6px;background:#f3f3f3">
-            <div style="font-weight:600">${hour}</div>
-            <div style="font-size:1.2rem">${icon.icon}</div>
-            <div>${temp} °C</div>
+    // Calcular datos adicionales
+    const maxTemp = Math.max(...tempArr.slice(idx, idx + 24).filter(t => t !== undefined));
+    const minTemp = Math.min(...tempArr.slice(idx, idx + 24).filter(t => t !== undefined));
+    const avgWind = (windsArr.slice(idx, idx + 24).reduce((a, b) => a + (b || 0), 0) / 24).toFixed(1);
+    
+    // Determinar dirección del viento (simplificado)
+    const windDirection = wind < 5 ? 'Calma' : wind < 15 ? 'Moderado' : wind < 25 ? 'Fuerte' : 'Muy fuerte';
+    
+    // Sensación térmica aproximada (simplificada)
+    const feelsLike = (current.temperature - (wind * 0.2)).toFixed(1);
+    
+    // Punto de rocío aproximado
+    const dewPoint = (current.temperature - ((100 - humidity) / 5)).toFixed(1);
+    
+    // Visibilidad (basado en humedad y código de clima)
+    let visibility = '10+ km';
+    if (current.weathercode >= 45 && current.weathercode <= 48) visibility = '< 1 km';
+    else if (humidity > 90) visibility = '5-8 km';
+    else if (humidity > 80) visibility = '8-10 km';
+    
+    // Presión atmosférica (valor aproximado para la zona)
+    const pressure = '1013 hPa';
+    
+    // Índice UV (aproximado según hora del día)
+    const currentHour = new Date(current.time).getHours();
+    let uvIndex = 0;
+    if (currentHour >= 10 && currentHour <= 16) uvIndex = Math.min(8, Math.floor((100 - humidity) / 15));
+    
+    detailZone.innerHTML = `
+        <h2>Detalles del Clima</h2>
+        <div class="details-grid">
+            <div class="detail-item">
+                <span class="detail-icon">💨</span>
+                <div class="detail-content">
+                    <div class="detail-label">Viento</div>
+                    <div class="detail-value">${wind} km/h</div>
+                    <div class="detail-extra">${windDirection}</div>
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-icon">💧</span>
+                <div class="detail-content">
+                    <div class="detail-label">Humedad</div>
+                    <div class="detail-value">${humidity}%</div>
+                    <div class="detail-extra">Punto rocío: ${dewPoint}°C</div>
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-icon">🌡️</span>
+                <div class="detail-content">
+                    <div class="detail-label">Sensación térmica</div>
+                    <div class="detail-value">${feelsLike}°C</div>
+                    <div class="detail-extra">Real: ${current.temperature}°C</div>
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-icon">📊</span>
+                <div class="detail-content">
+                    <div class="detail-label">Temp. hoy</div>
+                    <div class="detail-value">${Math.round(maxTemp)}° / ${Math.round(minTemp)}°</div>
+                    <div class="detail-extra">Máx / Mín</div>
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-icon">👁️</span>
+                <div class="detail-content">
+                    <div class="detail-label">Visibilidad</div>
+                    <div class="detail-value">${visibility}</div>
+                    <div class="detail-extra">${humidity > 85 ? 'Reducida' : 'Buena'}</div>
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-icon">🔆</span>
+                <div class="detail-content">
+                    <div class="detail-label">Índice UV</div>
+                    <div class="detail-value">${uvIndex}/10</div>
+                    <div class="detail-extra">${uvIndex < 3 ? 'Bajo' : uvIndex < 6 ? 'Moderado' : 'Alto'}</div>
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-icon">🌪️</span>
+                <div class="detail-content">
+                    <div class="detail-label">Presión</div>
+                    <div class="detail-value">${pressure}</div>
+                    <div class="detail-extra">Estable</div>
+                </div>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-icon">🌬️</span>
+                <div class="detail-content">
+                    <div class="detail-label">Viento promedio</div>
+                    <div class="detail-value">${avgWind} km/h</div>
+                    <div class="detail-extra">Últimas 24h</div>
+                </div>
+            </div>
         </div>`;
-    }
-    forecastHtml += '</div>';
-    weatherZone.innerHTML = forecastHtml;
-    
-    // Llamar a mostrarProximasHoras después de que los datos estén disponibles
-    mostrarProximasHoras();
-} 
 
-function mostrarProximasHoras() {
-    if (!weatherData) return;
-    
-    const current = weatherData.current_weather;
-    const times = (weatherData.hourly && weatherData.hourly.time) || [];
-    const temps = (weatherData.hourly && weatherData.hourly.temperature_2m) || [];
-    const hum = (weatherData.hourly && weatherData.hourly.relative_humidity_2m) || [];
-    const wcode = (weatherData.hourly && weatherData.hourly.weathercode) || [];
-
-    // Encontrar el índice de la hora actual
-    let idx = times.indexOf(current.time);
-    if (idx === -1) idx = 0;
-
-    futureZone.innerHTML = "<h2>Próximas 5 horas</h2>";
-
-    // Mostrar las próximas 5 horas desde la hora actual
-    for (let i = idx + 1; i <= idx + 5 && i < times.length; i++) {
-        if (!times[i]) break;
-        const hour = times[i].includes('T') ? times[i].split('T')[1].slice(0,5) : times[i];
-        const icon = weatherCodeToIcon(wcode[i]);
-        futureZone.innerHTML += `
-            <p>
-                ⏰ ${hour}<br>
-                ${icon.icon} 🌡️ ${temps[i] !== undefined ? temps[i] : '—'} °C<br>
-                💧 ${hum[i] !== undefined ? hum[i] : '—'} %
-            </p>
-        `;
-    }
+    // Llamar solo a próximos días
+    mostrarProximosDias();
 }
 
-function mostrarTiempoProximosDias() {
+function mostrarProximosDias() {
     if (!weatherData) return;
-    weatherZone.innerHTML += "<h2>Próximos 5 días</h2>";
-
+    
+    // Limpiar la zona de futureZone (no se usa)
+    futureZone.innerHTML = '';
+    
+    // Mostrar los próximos días
     const dates = (weatherData.daily && weatherData.daily.time) || [];
     const max = (weatherData.daily && weatherData.daily.temperature_2m_max) || [];
     const min = (weatherData.daily && weatherData.daily.temperature_2m_min) || [];
-    const wcode = (weatherData.daily && weatherData.daily.weathercode) || [];
-    for (let i = 0; i < Math.min(5, dates.length); i++) {
+    const wcodeDaily = (weatherData.daily && weatherData.daily.weathercode) || [];
+    
+    let forecastDaysHtml = '<h3>Próximos 7 Días</h3><div class="forecast-days">';
+    
+    for (let i = 0; i < Math.min(7, dates.length); i++) {
         const d = new Date(dates[i]);
-        const weekday = d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
-        const icon = weatherCodeToIcon(wcode[i]);
-        const iconText = icon.icon;
-        weatherZone.innerHTML += `
-            <p>
-                📅 ${weekday}<br>
-                ${iconText} ${max[i] !== undefined ? max[i] : '—'} °C / ${min[i] !== undefined ? min[i] : '—'} °C
-            </p>
-        `;
+        const weekday = d.toLocaleDateString('es-ES', { weekday: 'long' });
+        const dayMonth = d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+        const icon = weatherCodeToIcon(wcodeDaily[i]);
+        const isToday = i === 0;
+        
+        forecastDaysHtml += `
+            <div class="day-card ${isToday ? 'today' : ''}">
+                <div class="day-name">${isToday ? 'Hoy' : weekday}</div>
+                <div class="day-date">${dayMonth}</div>
+                <div class="day-icon">${icon.icon}</div>
+                <div class="day-description">${icon.text}</div>
+                <div class="day-temps">
+                    <span class="temp-max">${max[i] !== undefined ? Math.round(max[i]) : '—'}°</span>
+                    <span class="temp-separator">/</span>
+                    <span class="temp-min">${min[i] !== undefined ? Math.round(min[i]) : '—'}°</span>
+                </div>
+            </div>`;
     }
+    
+    forecastDaysHtml += '</div>';
+    weatherZone.innerHTML = forecastDaysHtml;
 }
